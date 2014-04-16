@@ -1,0 +1,9 @@
+README
+setup.py
+pysox/__init__.py
+pysox/soxdata.py
+pysox/soxtimestamp.py
+pysox.egg-info/PKG-INFO
+pysox.egg-info/SOURCES.txt
+pysox.egg-info/dependency_links.txt
+pysox.egg-info/top_level.txt
