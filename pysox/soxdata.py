@@ -43,6 +43,9 @@ class SensorData(object):
         xml = self.to_xml()
         return etree.tostring(xml)
 
+    def __str__(self):
+        return self.to_string()
+
     def to_string(self, pretty=True):
         xml = self.to_xml()
         return etree.tostring(xml, pretty_print=pretty)
@@ -75,6 +78,9 @@ class TransducerValue(object):
     def __repr__(self):
         xml = self.to_xml()
         return etree.tostring(xml)
+
+    def __str__(self):
+        return self.to_string()
 
     def to_string(self, pretty=True):
         xml = self.to_xml()
