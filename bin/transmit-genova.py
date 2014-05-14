@@ -94,9 +94,10 @@ class GenovaDataSendingClient(sleekxmpp.ClientXMPP):
                 self.debug('built payload: %s' % xml_string)
 
                 self['xep_0060'].publish(
-                    'pubsub.ps.ht.sfc.keio.ac.jp',
+                    # 'pubsub.ps.ht.sfc.keio.ac.jp',
+                    'pubsub.sox.ht.sfc.keio.ac.jp',
                     # self.node_name,
-                    self.node_name,
+                    self.node_name + '_data',
                     id=self.gen_item_id(),
                     payload=payload
                 )
@@ -118,12 +119,6 @@ class GenovaDataSendingClient(sleekxmpp.ClientXMPP):
     def gen_item_id(self):
         return uuid.uuid1().hex
 
-    # def _publish_sd(self, node_name, sensor_data):
-    #     xml_string = sensor_data.to_string(pretty=False)
-    #     payload = ET.fromstring(xml_string);
-    #     # print '[node:%s] payload built: %s' % (node_name, xml_string)
-    #     self['xep_0060'].publish('pubsub.ht.sfc.keio.ac.jp', node_name, id=self.gen_item_id(), payload=payload);
-
 
 def main():
     logger = logging.getLogger()
@@ -144,12 +139,16 @@ def main():
         sys.exit(0)
     signal.signal(signal.SIGINT, _signal_handler)
 
-    jid = 'guest@ps.ht.sfc.keio.ac.jp'
+    # jid = 'guest@ps.ht.sfc.keio.ac.jp'
+    jid = 'guest@sox.ht.sfc.keio.ac.jp'
     pw = 'miroguest'
 
-    i = 5
-    while i <= 32:
-    while i <= 5:
+
+    id_list = [5, 10, 15, 20, 25, 30]
+    # i = 5
+    # while i <= 32:
+    # while i <= 5:
+    for i in id_list:
         def _thread(client):
             if client.connect():
                 client.process(block=True)

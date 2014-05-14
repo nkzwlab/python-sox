@@ -240,8 +240,10 @@ class PubsubClient(sleekxmpp.ClientXMPP):
 
                         # print 'payload built'
 
+                        print '[generator:%s] sending: %s' % (node_name, dummy_payload_xml_string)
                         self['xep_0060'].publish(
-                            'pubsub.ps.ht.sfc.keio.ac.jp',
+                            # 'pubsub.ps.ht.sfc.keio.ac.jp',
+                            'pubsub.sox.ht.sfc.keio.ac.jp',
                             # self.node_name,
                             node_name,
                             id=self.gen_item_id(),
@@ -266,18 +268,13 @@ class PubsubClient(sleekxmpp.ClientXMPP):
     def gen_item_id(self):
         return uuid.uuid1().hex
 
-    def _publish_sd(self, node_name, sensor_data):
-        xml_string = sensor_data.to_string(pretty=False)
-        payload = ET.fromstring(xml_string);
-        print '[node:%s] payload built: %s' % (node_name, xml_string)
-        self['xep_0060'].publish('pubsub.ht.sfc.keio.ac.jp', node_name, id=self.gen_item_id(), payload=payload);
-
 
 if __name__ == '__main__':
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
 
-    jid = 'guest@ps.ht.sfc.keio.ac.jp'
+    # jid = 'guest@ps.ht.sfc.keio.ac.jp'
+    jid = 'guest@sox.ht.sfc.keio.ac.jp'
     pw = 'miroguest'
     node_name = 'sb-graph1_data'
 
