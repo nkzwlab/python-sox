@@ -3,7 +3,6 @@
 import sleekxmpp
 import pprint
 import logging
-from bs4 import BeautifulSoup
 
 
 class PubsubClient(sleekxmpp.ClientXMPP):
@@ -17,33 +16,29 @@ class PubsubClient(sleekxmpp.ClientXMPP):
         self.add_event_handler('session_start', self.start, threaded=True)
 
     def start(self, event):
-        print 'start'
-        # self.get_roster()
-        print 'got roster'
-        # self.send_presence()
-        print 'sent presence'
+        self.get_roster()
+        self.send_presence()
+
+
+
+        # def cb(*args, **kwargs):
+        #     result = args[0]
+        #     print 'result type = %s'  % type(result)
+
+        #     print '_get_nodes_callback: args=%s, kwargs=%s' % (pprint.pformat(args), pprint.pformat(kwargs))
+        #     self.disconnect()
+        # print 'defined callback'
+
+        # self['xep_0060'].get_nodes('pubsub.sox.ht.sfc.keio.ac.jp', callback=cb)
+        # print 'requested'
 
         def cb(*args, **kwargs):
-            result = args[0]
-            xml_str = '%s' % result
-
-            soup = BeautifulSoup(xml_str)
-            items = soup.find_all('item')
-            nodes = []
-
-            for item in items:
-                nodes.append(item.attrs['node'])
-
-            nodes.sort()
-            for item in nodes:
-                print item
-
-
+            print 'callback: args=%s, kwargs=%s' % (pprint.pformat(args), pprint.pformat(kwargs))
             self.disconnect()
-        print 'defined callback'
 
-        self['xep_0060'].get_nodes('pubsub.sox.ht.sfc.keio.ac.jp', callback=cb)
-        print 'requested'
+        # self['xep_0060'].get_item_ids('pubsub.sox.ht.sfc.keio.ac.jp', 'genova5_meta', callback=cb)
+        self['xep_0060'].get_items('pubsub.sox.ht.sfc.keio.ac.jp', 'sb-data1_data', callback=cb)
+
 
 
 if __name__ == '__main__':
