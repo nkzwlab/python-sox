@@ -85,3 +85,100 @@ class TransducerValue(object):
     def to_string(self, pretty=True):
         xml = self.to_xml()
         return etree.tostring(xml, pretty_print=pretty)
+
+
+class SensorMeta(object):
+    def __init__(self, name, id, type, timestamp, description, serialNumber, timezone=None):
+        self.transducers = []
+
+        self.name = name
+        self.id = id
+        self.type = type
+        self.description = description
+        self.serialNumber = serialNumber
+
+        if timestamp and type(timestamp) is datetime.datetime:
+            tz = timezone or timestamp.tzinfo or dateutil.tz.tzlocal()
+        else:
+            tz = timezone or dateutil.tz.tzlocal()
+        self.timestamp = timestamp or datetime.datetime.now(tz)
+        self.timezone = timezone
+
+    def add_transducer(self, tdr):
+        self.transducers.append(tdr)
+
+    def to_xml(self):
+        ts = self.timestamp
+        if type(ts) is datetime.datetime:
+            ts = soxtimestamp.timestamp(ts, tz=self.timezone)
+
+        attributes = dict(timestamp=ts, xmlns='http://jabber.org/protocol/sox')
+        for attrname in ('name', 'id', 'type', 'description', 'serialNumber'):
+            attributes[attrname] = getattr(self, attrname)
+
+        device_tag = etree.Element('device', attributes)
+        for tdr in self.transducers:
+            device_tag.append(tdr.to_xml())
+
+        return device_tag
+
+    def __repr__(self):
+        xml = self.to_xml()
+        return etree.tostring(xml)
+
+    def __str__(self):
+        return self.to_string()
+
+    def to_string(self, pretty=True):
+        xml = self.to_xml()
+        return etree.tostring(xml, pretty_print=pretty)
+
+
+class MetaTransducer(object):
+    def __init__(self, *args, **kwargs):
+        self.attributes = {}
+        self.attr_names = (
+            'name', 'id', 'units', 'unitScalar', 'canActuate',
+            'hasOwnNode', 'transducerTypeName', 'manufacturer',
+            'partNumber', 'serialNumber', 'minValue', 'maxValue',
+            'resolution', 'precision', 'accuracy'
+        )
+
+        for attr in self.attr_names:
+            self[attr] = kwargs[attr] if attr in kwargs else None
+
+    def __getitem__(self, attrname):
+        return self.attributes[attrname]
+
+    def __setitem__(self, attrname, value):
+        self.attributes[attrname] = value
+
+    def to_xml(self):
+        tmp_attrs = dict()
+        required = ('name', 'id')
+        for r_attr in required:
+            assert r_attr in self.attributes, 'attribute is required: %s' % r_attr
+            assert self.attributes[r_attr] is not None, 'attribute is required: %s' % r_attr
+            tmp_attrs[r_attr]  = self.attributes[r_attr]
+
+        for attr in self.attr_names:
+            if attr in required:
+                continue
+            elif attr in self.attributes and self.attributes[attr] is not None:
+                tmp_attrs[attr] = self.attributes[attr]
+
+        # transducer_tag = etree.Element('transducer', self.attributes)
+        transducer_tag = etree.Element('transducer', tmp_attrs)
+        return transducer_tag
+
+    def __repr__(self):
+        xml = self.to_xml()
+        return etree.tostring(xml)
+
+    def __str__(self):
+        return self.to_string()
+
+    def to_string(self, pretty=True):
+        xml = self.to_xml()
+        return etree.tostring(xml, pretty_print=pretty)
+
