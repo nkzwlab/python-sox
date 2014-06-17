@@ -23,8 +23,8 @@ class PubsubClient(sleekxmpp.ClientXMPP):
 
     def start(self, event):
         print 'start'
-        self.get_roster()
-        self.send_presence()
+        # self.get_roster()
+        # self.send_presence()
         # self._start_receiving()
 
         self.count = 0
@@ -46,37 +46,13 @@ class PubsubClient(sleekxmpp.ClientXMPP):
         # self['xep_0060'].create_node('pubsub.ps.ht.sfc.keio.ac.jp', self.node_to_create, callback=_create_callback)
         # print 'created'
 
-
-    # def _start_receiving(self):
-    #     print 'start receiving!'
-    #     self._subscribe('pubsub.ps.ht.sfc.keio.ac.jp', 'sample_data')
-
-    # def _subscribe(self, server, node):
-    #     try:
-    #         ifrom = self.__my_own_jid
-    #         result = self['xep_0060'].subscribe(server, node, ifrom=ifrom, callback=self._subscribe_callback)
-    #         print 'subscribe ok result=%s' % pprint.pformat(result)
-    #     except:
-    #         print 'subscribe ERROR'
-
-    # def _subscribe_callback(self, *args, **kwargs):
-    #     print 'got something'
-    #     print 'args=%s, kwargs=%s' % (pprint.pformat(args), pprint.pformat(kwargs))
-
-    # def _publish(self, msg):
-    #     print 'got! %s' % msg
+        print '!!! finish, disconnecting'
+        self.disconnect()
 
 
 if __name__ == '__main__':
-    # if len(sys.argv) < 2:
-    #     print 'USAGE: python ./create_node.py NODE_NAME'
-    #     sys.exit(0)
-
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
-
-    # node_name = sys.argv[1]
-    # print 'node name to create: %s' % node_name
 
     nodes = ['sb-data1', 'sb-image1', 'sb-graph1', 'sb-tagcloud1']
 
@@ -88,6 +64,11 @@ if __name__ == '__main__':
     print '---nodes:'
     for node in nodes:
         print node
+
+    check = raw_input('ok?[y/n] ')
+    if check.lower() != 'y':
+        print 'aborting.'
+        sys.exit(-1)
 
     # sys.exit(0)
 
