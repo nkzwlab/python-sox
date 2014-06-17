@@ -14,7 +14,6 @@ import sleekxmpp
 import pprint
 import logging
 import dateutil.tz
-from sleekxmpp.xmlstream import ET
 import datetime
 import math
 import gevent
@@ -24,6 +23,9 @@ import base64
 import random
 import grequests
 import simplejson
+
+from sleekxmpp.xmlstream import ET
+from sleekxmpp.exceptions import IqTimeout
 
 from pysox import soxtimestamp
 from pysox.soxdata import SensorData, TransducerValue
@@ -93,14 +95,15 @@ class GenovaDataSendingClient(sleekxmpp.ClientXMPP):
                 payload = ET.fromstring(xml_string)
                 self.debug('built payload: %s' % xml_string)
 
-                self['xep_0060'].publish(
-                    # 'pubsub.ps.ht.sfc.keio.ac.jp',
-                    'pubsub.sox.ht.sfc.keio.ac.jp',
-                    # self.node_name,
-                    self.node_name + '_data',
-                    id=self.gen_item_id(),
-                    payload=payload
-                )
+                try:
+                    self['xep_0060'].publish(
+                        'pubsub.sox.ht.sfc.keio.ac.jp',
+                        self.node_name + '_data',
+                        id=self.gen_item_id(),
+                        payload=payload
+                    )
+                except IqTimeout:
+                    self.debug('IGNORE IqTimeout')
 
                 self.debug('published')
 

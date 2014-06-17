@@ -7,7 +7,6 @@ import sleekxmpp
 import pprint
 import logging
 import dateutil.tz
-from sleekxmpp.xmlstream import ET
 import datetime
 import math
 import gevent
@@ -16,6 +15,9 @@ import os.path
 import base64
 import random
 import simplejson
+
+from sleekxmpp.xmlstream import ET
+from sleekxmpp.exceptions import IqTimeout
 
 from pysox import soxtimestamp
 from pysox.soxdata import SensorData, TransducerValue
@@ -241,14 +243,17 @@ class PubsubClient(sleekxmpp.ClientXMPP):
                         # print 'payload built'
 
                         print '[generator:%s] sending: %s' % (node_name, dummy_payload_xml_string)
-                        self['xep_0060'].publish(
-                            # 'pubsub.ps.ht.sfc.keio.ac.jp',
-                            'pubsub.sox.ht.sfc.keio.ac.jp',
-                            # self.node_name,
-                            node_name,
-                            id=self.gen_item_id(),
-                            payload=payload
-                        )
+                        try:
+                            self['xep_0060'].publish(
+                                # 'pubsub.ps.ht.sfc.keio.ac.jp',
+                                'pubsub.sox.ht.sfc.keio.ac.jp',
+                                # self.node_name,
+                                node_name,
+                                id=self.gen_item_id(),
+                                payload=payload
+                            )
+                        except IqTimeout:
+                            print '[geenrator:%s] IGNORE IqTimeout!' % node_name
                         print '[generator:%s] sent: %s' % (node_name, dummy_payload_xml_string)
 
                         counter[node_name] = 0
