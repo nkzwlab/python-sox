@@ -93,13 +93,13 @@ class GenovaDataSendingClient(sleekxmpp.ClientXMPP):
                 try:
                     gevent.sleep(1.0 + 0.1 * random.randint(1, 30))
                     genova_data = get_genova_data(self.genova_id)
-                    # self.debug('got genova data: %s' % simplejson.dumps(genova_data))
-                    self.debug('got genova data')
+                    self.debug('got genova data: %s' % simplejson.dumps(genova_data))
+                    # self.debug('got genova data')
                     genova_sensor_data = genova2sensor(genova_data)
                     xml_string = genova_sensor_data.to_string()
                     payload = ET.fromstring(xml_string)
-                    # self.debug('built payload: %s' % xml_string)
-                    self.debug('built payload')
+                    self.debug('built payload: %s' % xml_string)
+                    # self.debug('built payload')
 
                     try:
                         self['xep_0060'].publish(
