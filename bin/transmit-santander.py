@@ -72,34 +72,40 @@ class SantanderProxy(sleekxmpp.ClientXMPP):
         self.running = True
         try:
             print 'starting!'
-            while self.running:
-                for sid in self.santander_ids:
-                    if not self.running:
-                        break
-                    node_name = 'santander%d_data' % sid
+            err_count = 0
+            err_threshold = 5
+            while self.running and err_count < err_threshold:
+                try:
+                    for sid in self.santander_ids:
+                        if not self.running:
+                            break
+                        node_name = 'santander%d_data' % sid
 
-                    print 'fetching for santander sensor id=%d' % sid
-                    sdata = get_santander_data(sid)
-                    print 'fetched for santander sensor id=%d' % sid
-                    sd = santander2sensor(sdata)
-                    xml_string = sd.to_string()
-                    payload = ET.fromstring(xml_string)
+                        print 'fetching for santander sensor id=%d' % sid
+                        sdata = get_santander_data(sid)
+                        print 'fetched for santander sensor id=%d' % sid
+                        sd = santander2sensor(sdata)
+                        xml_string = sd.to_string()
+                        payload = ET.fromstring(xml_string)
 
-                    try:
-                        self['xep_0060'].publish(
-                            'pubsub.sox.ht.sfc.keio.ac.jp',
-                            node_name,
-                            id=self.gen_item_id(),
-                            payload=payload
-                        )
-                    except IqTimeout:
-                        print 'caught IqTimeout, but ignoring'
-                    print 'published for node \'%s\'' % node_name
+                        try:
+                            self['xep_0060'].publish(
+                                'pubsub.sox.ht.sfc.keio.ac.jp',
+                                node_name,
+                                id=self.gen_item_id(),
+                                payload=payload
+                            )
+                        except IqTimeout:
+                            print 'caught IqTimeout, but ignoring'
+                            err_count += 1
+                            if err_threshold <= err_count:
+                                break
+                        print 'published for node \'%s\'' % node_name
 
-                time.sleep(3)
-
-        except:
-            logging.exception('something bad happened!')
+                    time.sleep(3)
+                except:
+                    logging.exception('something bad happened!')
+                    err_count += 1
         finally:
             self.disconnect()
 
@@ -129,13 +135,14 @@ def main():
         xmpp.disconnect()
     signal.signal(signal.SIGINT, _signal_handler)
 
-    print 'connecting...'
-
-    if xmpp.connect():
-        print 'connected'
-        xmpp.process(block=True)
-    else:
-        print 'could NOT connect'
+    while True:
+        print 'connecting...'
+        if xmpp.connect():
+            print 'connected'
+            xmpp.process(block=True)
+            print '@@ error occured too much, reconnecting!'
+        else:
+            print 'could NOT connect'
 
 if __name__ == '__main__':
     main()
