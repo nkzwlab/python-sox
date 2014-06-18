@@ -9,7 +9,8 @@ import logging
 import dateutil.tz
 import datetime
 import math
-import gevent
+# import gevent
+import time
 import traceback
 import os.path
 import base64
@@ -111,6 +112,7 @@ class DummyImageDataGenerator(object):
     def __init__(self):
         self.name = 'sb-image1_data'
         self.dummy_img_dir = './dummy-images'
+        self.file_list_cache = {}
         self.init_b64_images()
 
     def init_b64_images(self):
@@ -120,7 +122,12 @@ class DummyImageDataGenerator(object):
         here = os.path.dirname(__file__)
         real_dir_path = os.path.normpath(os.path.join(here, self.dummy_img_dir))
 
-        for f in os.listdir(real_dir_path):
+        if real_dir_path not in self.file_list_cache:
+            file_list = os.listdir(real_dir_path)
+            self.file_list_cache[real_dir_path] = file_list
+
+        # for f in os.listdir(real_dir_path):
+        for f in self.file_list_cache[real_dir_path]:
             if not img_file_pat.search(f):
                 print 'not image: skipping %s' % f
                 continue
@@ -162,10 +169,10 @@ class DummyImageDataGenerator(object):
 
 
 class PubsubClient(sleekxmpp.ClientXMPP):
-    def __init__(self, jid, password, node_name):
+    def __init__(self, jid, password):
         super(PubsubClient, self).__init__(jid, password)
         self.__my_own_jid = jid
-        self.node_name = node_name
+        # self.node_name = node_name
         self.register_plugin('xep_0030')
         self.register_plugin('xep_0059')
         self.register_plugin('xep_0060')
@@ -175,10 +182,10 @@ class PubsubClient(sleekxmpp.ClientXMPP):
 
     def start(self, event):
         print 'start'
-        self.get_roster()
-        print 'got roster'
-        self.send_presence()
-        print 'sent presence'
+        # self.get_roster()
+        # print 'got roster'
+        # self.send_presence()
+        # print 'sent presence'
         # self._start_receiving()
 
         self.start_sending_data()
@@ -213,20 +220,14 @@ class PubsubClient(sleekxmpp.ClientXMPP):
             'sb-data1_data': 0
         }
 
-        # just for test: send 1 message
-        while True:
-            # t = datetime.datetime.now(dateutil.tz.tzlocal())
-            # scale = math.sin( math.pi * t.second / 60 ) * 100
-            # value = t.second
-            # value = 20 + math.sin(math.pi * (t.second / 60.0 * 4.0)) * 5
+        err_count = 0
+        err_threshold = 5
 
+        # just for test: send 1 message
+        while err_count < err_threshold:
             # print 'starting sending data'
             try:
                 for dd_generator in dummy_data_generators:
-                    # ts = soxtimestamp.timestamp()
-                    # print 'ts=%s' % ts
-                    # payload = ET.fromstring('<data><transducerValue id="trans1" typed_value="%f" timestamp="%s"/></data>' % (value, ts))
-
                     node_name = dd_generator.name
 
                     counter[node_name] += 1
@@ -234,26 +235,21 @@ class PubsubClient(sleekxmpp.ClientXMPP):
                         dummy_data = dd_generator.generate()
                         dummy_payload_xml_string = dummy_data.to_string(pretty=False)
                         payload = ET.fromstring(dummy_payload_xml_string)
-
-                        # sd = SensorData()
-                        # tv1 = TransducerValue(id='trans1', typed_value='%s' % value, timestamp=ts)
-                        # sd.add_value(tv1)
-                        # payload = ET.fromstring(sd.to_string(pretty=False))
-
                         # print 'payload built'
 
                         print '[generator:%s] sending: %s' % (node_name, dummy_payload_xml_string)
                         try:
                             self['xep_0060'].publish(
-                                # 'pubsub.ps.ht.sfc.keio.ac.jp',
                                 'pubsub.sox.ht.sfc.keio.ac.jp',
-                                # self.node_name,
                                 node_name,
                                 id=self.gen_item_id(),
                                 payload=payload
                             )
                         except IqTimeout:
                             print '[geenrator:%s] IGNORE IqTimeout!' % node_name
+                            err_count += 1
+                            if err_threshold <= err_count:
+                                break
                         print '[generator:%s] sent: %s' % (node_name, dummy_payload_xml_string)
 
                         counter[node_name] = 0
@@ -262,10 +258,12 @@ class PubsubClient(sleekxmpp.ClientXMPP):
                 traceback.print_exc()
                 etype, value, etraceback = sys.exc_info()
                 raise etype, value, etraceback
+                err_count += 1
             # print 'requested'
 
             # gevent.sleep(1.2)
-            gevent.sleep(0.1)
+            # gevent.sleep(0.1)
+            time.sleep(0.1)
 
         self.disconnect()
         print 'disconnected'
@@ -278,14 +276,13 @@ if __name__ == '__main__':
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
 
-    # jid = 'guest@ps.ht.sfc.keio.ac.jp'
     jid = 'guest@sox.ht.sfc.keio.ac.jp'
     pw = 'miroguest'
-    node_name = 'sb-graph1_data'
 
-    xmpp = PubsubClient(jid, pw, node_name)
-    if xmpp.connect():
-        print 'connected'
-        xmpp.process(block=True)
-    else:
-        print 'could NOT connect'
+    while True:
+        xmpp = PubsubClient(jid, pw)
+        if xmpp.connect():
+            print 'connected'
+            xmpp.process(block=True)  # will stop if error counter reach threshold
+        else:
+            print 'could NOT connect'
