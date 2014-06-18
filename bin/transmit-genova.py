@@ -73,10 +73,10 @@ class GenovaDataSendingClient(sleekxmpp.ClientXMPP):
 
     def start(self, event):
         self.debug('start')
-        self.get_roster()
-        self.debug('got roster')
-        self.send_presence()
-        self.debug('sent presence')
+        # self.get_roster()
+        # self.debug('got roster')
+        # self.send_presence()
+        # self.debug('sent presence')
         # self._start_receiving()
 
         self.start_sending_data()
@@ -162,7 +162,7 @@ def main():
         gthread = gevent.spawn(_thread, client)
         threads.append(gthread)
         print 'thread for genova-%d started' % i
-        i += 1
+        # i += 1
 
     while True:
         gevent.sleep(1.0)
