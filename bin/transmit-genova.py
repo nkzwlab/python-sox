@@ -134,7 +134,6 @@ def main():
     logger.setLevel(logging.DEBUG)
 
     threads = set([])
-    # clients = []
     clients = set([])
 
     def _signal_handler(signum, frame):
@@ -151,7 +150,7 @@ def main():
         sys.exit(0)
     signal.signal(signal.SIGINT, _signal_handler)
 
-    # jid = 'guest@ps.ht.sfc.keio.ac.jp'
+    # config
     jid = 'guest@sox.ht.sfc.keio.ac.jp'
     pw = 'miroguest'
 
@@ -160,9 +159,7 @@ def main():
     def _process_thread(client):
         if client.connect():
             client.process(block=True)
-    # i = 5
-    # while i <= 32:
-    # while i <= 5:
+
     for i in id_list:
         client = GenovaDataSendingClient(jid, pw, i)
         clients.add(client)
@@ -173,38 +170,27 @@ def main():
         threads.add(gthread)
         print 'thread for genova-%d started' % i
 
-    # while True:
-    #     gevent.sleep(1.0)
-    while True:
-        try:
-            # finish means err occured too much
-            finished_threads = gevent.wait(threads, count=1)
-            finished_thread = finished_threads[0]
-            finished_client = finished_thread.client
-            clients.remove(finished_client)  # remove from active list
-            genova_id = finished_thread.genova_id
-            print '@@@ id %d died! respawning again' % genova_id
-            threads.remove(finished_thread)  # remove from active list
+    try:
+        # finish means err occured too much
+        finished_threads = gevent.wait(threads, count=1)
+        finished_thread = finished_threads[0]
+        finished_client = finished_thread.client
+        clients.remove(finished_client)  # remove from active list
+        genova_id = finished_thread.genova_id
+        print '@@@ id %d died! respawning again' % genova_id
+        threads.remove(finished_thread)  # remove from active list
 
-            # connect and process again for the genova ID
-            new_client = GenovaDataSendingClient(jid, pw, genova_id)
-            clients.add(new_client)
-            new_thread = gevent.spawn(_process_thread, new_client)
-            new_thread.client = new_client
-            new_thread.genova_id = genova_id
-            threads.add(new_thread)
-        except:
-            logging.exception('something bad happened')
-            raise
+        # connect and process again for the genova ID
+        new_client = GenovaDataSendingClient(jid, pw, genova_id)
+        clients.add(new_client)
+        new_thread = gevent.spawn(_process_thread, new_client)
+        new_thread.client = new_client
+        new_thread.genova_id = genova_id
+        threads.add(new_thread)
+    except:
+        logging.exception('something bad happened')
+        raise
 
-    # node_name = 'sb-graph1_data'
-
-    # xmpp = PubsubClient(jid, pw, node_name)
-    # if xmpp.connect():
-    #     print 'connected'
-    #     xmpp.process(block=True)
-    # else:
-    #     print 'could NOT connect'
 
 if __name__ == '__main__':
     main_thread = gevent.spawn(main)

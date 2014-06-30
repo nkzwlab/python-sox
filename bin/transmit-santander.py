@@ -135,14 +135,13 @@ def main():
         xmpp.disconnect()
     signal.signal(signal.SIGINT, _signal_handler)
 
-    while True:
-        print 'connecting...'
-        if xmpp.connect():
-            print 'connected'
-            xmpp.process(block=True)
-            print '@@ error occured too much, reconnecting!'
-        else:
-            print 'could NOT connect'
+    print 'connecting...'
+    if xmpp.connect():
+        print 'connected'
+        xmpp.process(block=True)
+        print 'unexpected death!'
+    else:
+        print 'could NOT connect'
 
 if __name__ == '__main__':
     main()

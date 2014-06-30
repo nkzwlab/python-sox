@@ -279,10 +279,9 @@ if __name__ == '__main__':
     jid = 'guest@sox.ht.sfc.keio.ac.jp'
     pw = 'miroguest'
 
-    while True:
-        xmpp = PubsubClient(jid, pw)
-        if xmpp.connect():
-            print 'connected'
-            xmpp.process(block=True)  # will stop if error counter reach threshold
-        else:
-            print 'could NOT connect'
+    xmpp = PubsubClient(jid, pw)
+    if xmpp.connect():
+        print 'connected'
+        xmpp.process(block=True)  # will stop if error counter reach threshold
+    else:
+        print 'could NOT connect'
