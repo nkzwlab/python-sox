@@ -177,7 +177,7 @@ class PubsubClient(sleekxmpp.ClientXMPP):
         self.register_plugin('xep_0059')
         self.register_plugin('xep_0060')
 
-        self.add_event_handler('session_start', self.start, threaded=True)
+        self.add_event_handler('session_start', self.start, threaded=False)
         # self.add_event_handler('pubsub_publish', self._publish)
 
     def start(self, event):
