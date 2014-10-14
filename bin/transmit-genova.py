@@ -91,7 +91,7 @@ class GenovaDataSendingClient(sleekxmpp.ClientXMPP):
         try:
             while self.running and err_count < err_threshold:
                 try:
-                    gevent.sleep(1.0 + 0.1 * random.randint(1, 30))
+                    gevent.sleep(5.0 + 0.1 * random.randint(1, 30))
                     genova_data = get_genova_data(self.genova_id)
                     self.debug('got genova data: %s' % simplejson.dumps(genova_data))
                     # self.debug('got genova data')

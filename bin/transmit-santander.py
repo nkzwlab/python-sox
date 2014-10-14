@@ -102,7 +102,7 @@ class SantanderProxy(sleekxmpp.ClientXMPP):
                                 break
                         print 'published for node \'%s\'' % node_name
 
-                    time.sleep(3)
+                    time.sleep(5)
                 except:
                     logging.exception('something bad happened!')
                     err_count += 1
