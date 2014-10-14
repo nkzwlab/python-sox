@@ -167,6 +167,9 @@ class MetaTransducer(object):
             elif attr in self.attributes and self.attributes[attr] is not None:
                 tmp_attrs[attr] = self.attributes[attr]
 
+        # TODO
+        tmp_attrs['rawValue'] = tmp_attrs['typedValue']
+
         # transducer_tag = etree.Element('transducer', self.attributes)
         transducer_tag = etree.Element('transducer', tmp_attrs)
         return transducer_tag
