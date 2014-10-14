@@ -71,7 +71,13 @@ class TransducerValue(object):
         if type(ts) is datetime.datetime:
             ts = soxtimestamp.timestamp(ts, tz=self.timezone)
 
-        attributes = dict(id=self.id, typedValue=self.typed_value, timestamp=ts)
+        attributes = dict(
+            id=self.id,
+            typedValue=self.typed_value,
+            timestamp=ts,
+            rawValue=self.typed_value  # TODO
+        )
+
         transducer_tag = etree.Element('transducerValue', **attributes)
         return transducer_tag
 
@@ -166,9 +172,6 @@ class MetaTransducer(object):
                 continue
             elif attr in self.attributes and self.attributes[attr] is not None:
                 tmp_attrs[attr] = self.attributes[attr]
-
-        # TODO
-        tmp_attrs['rawValue'] = tmp_attrs['typedValue']
 
         # transducer_tag = etree.Element('transducer', self.attributes)
         transducer_tag = etree.Element('transducer', tmp_attrs)
