@@ -110,8 +110,8 @@ class MitsuiReparkSendingClient(sleekxmpp.ClientXMPP):
                 sleep_time = (BASE_CRAWL_INTERVAL - JITTER) + random.random() * (JITTER * 2.0)
                 logging.debug('sleeping %fsec... (node=%s)' % (sleep_time, sox_node_name))
 
-                sleep_unit = 20
                 while 0 < sleep_time:
+                    sleep_unit = 55.0 + 1.0 * random.randint(0, 10) 
                     next_sleep_sec = sleep_unit if sleep_unit < sleep_time else sleep_time
                     logging.debug('sleeping %fsec then send presence (node=%s)' % (next_sleep_sec, sox_node_name))
                     gevent.sleep(next_sleep_sec)
