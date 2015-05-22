@@ -52,13 +52,14 @@ class SensorData(object):
 
 
 class TransducerValue(object):
-    def __init__(self, id, typed_value, timestamp=None, timezone=None):
+    def __init__(self, id, typed_value, timestamp=None, timezone=None, raw_value=None):
         assert isinstance(id, (str, unicode))
         assert isinstance(typed_value, (str, unicode))
         if timestamp and isinstance(timestamp, (str, unicode)):
             assert soxtimestamp.is_sox_timestamp_format(timestamp), 'timestamp %s is not XEP-0082 format' % timestamp
         self.id = id
         self.typed_value = typed_value
+        self.raw_value = raw_value
         if timestamp and type(timestamp) is datetime.datetime:
             tz = timezone or timestamp.tzinfo or dateutil.tz.tzlocal()
         else:
@@ -75,7 +76,7 @@ class TransducerValue(object):
             id=self.id,
             typedValue=self.typed_value,
             timestamp=ts,
-            rawValue=self.typed_value  # TODO
+            rawValue=self.raw_value or self.typed_value
         )
 
         transducer_tag = etree.Element('transducerValue', **attributes)
