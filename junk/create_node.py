@@ -30,7 +30,7 @@ class PubsubClient(sleekxmpp.ClientXMPP):
             print '_create_callback: args=%s, kwargs=%s' % (pprint.pformat(args), pprint.pformat(kwargs))
             self.disconnect()
 
-        self['xep_0060'].create_node('pubsub.ps.ht.sfc.keio.ac.jp', self.node_to_create, callback=_create_callback)
+        self['xep_0060'].create_node('pubsub.sox.ht.sfc.keio.ac.jp', self.node_to_create, callback=_create_callback)
         print 'created'
 
 
