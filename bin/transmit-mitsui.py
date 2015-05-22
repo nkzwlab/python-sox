@@ -23,6 +23,7 @@ from pysox.soxdata import SensorData, TransducerValue
 
 BASE_CRAWL_INTERVAL = 300  # 300=5min
 JITTER = 5
+START_DELAY = 1
 
 node2clients = dict()
 node2stop_flag = dict()
@@ -216,6 +217,8 @@ def main():
         node2stop_flag[item['node_name']] = False
         thread = gevent.spawn(mitsui_process, jid, pw, pubsub_name, item)
         threads.append(thread)
+
+        gevent.sleep(START_DELAY)
 
     logging.debug('started %d threads' % len(threads))
     gevent.joinall(threads)
