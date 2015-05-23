@@ -195,8 +195,8 @@ def my_signal_handler(signum, frame):
 def main():
     global node2stop_flag
 
-    logger = logging.getLogger()
-    logger.setLevel(logging.DEBUG)
+    # logger = logging.getLogger()
+    # logger.setLevel(logging.DEBUG)
 
     if len(sys.argv) < 2:
         print 'USAGE: python transmit-mitsui.py MITSUI_FILE'
