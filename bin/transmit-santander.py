@@ -43,7 +43,7 @@ def santander2sensor(sdata):
 
     # set timestamp as 'date' field
     raw_date = sdata['date']
-    print 'raw_date=%s' % raw_date
+    # print 'raw_date=%s' % raw_date
     pat = re.compile(r'[\:\- ]')
     year, mon, day, hour, min, sec = map(lambda s: int(s), re.split(pat, raw_date))
     santander_timezone = get_santander_timezone()
@@ -71,7 +71,7 @@ class SantanderProxy(sleekxmpp.ClientXMPP):
     def start(self, event):
         self.running = True
         try:
-            print 'starting!'
+            # print 'starting!'
             err_count = 0
             err_threshold = 5
             while self.running and err_count < err_threshold:
@@ -81,9 +81,9 @@ class SantanderProxy(sleekxmpp.ClientXMPP):
                             break
                         node_name = 'santander%d_data' % sid
 
-                        print 'fetching for santander sensor id=%d' % sid
+                        # print 'fetching for santander sensor id=%d' % sid
                         sdata = get_santander_data(sid)
-                        print 'fetched for santander sensor id=%d' % sid
+                        # print 'fetched for santander sensor id=%d' % sid
                         sd = santander2sensor(sdata)
                         xml_string = sd.to_string()
                         payload = ET.fromstring(xml_string)
@@ -96,11 +96,11 @@ class SantanderProxy(sleekxmpp.ClientXMPP):
                                 payload=payload
                             )
                         except IqTimeout:
-                            print 'caught IqTimeout, but ignoring'
+                            # print 'caught IqTimeout, but ignoring'
                             err_count += 1
                             if err_threshold <= err_count:
                                 break
-                        print 'published for node \'%s\'' % node_name
+                        # print 'published for node \'%s\'' % node_name
 
                     time.sleep(30)
                 except:
@@ -115,7 +115,8 @@ class SantanderProxy(sleekxmpp.ClientXMPP):
 
 def main():
     logger = logging.getLogger()
-    logger.setLevel(logging.DEBUG)
+    # logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.INFO)
     jid = 'guest@sox.ht.sfc.keio.ac.jp'
     pw = 'miroguest'
     santander_ids = (173, 181, 193, 199)
@@ -135,13 +136,14 @@ def main():
         xmpp.disconnect()
     signal.signal(signal.SIGINT, _signal_handler)
 
-    print 'connecting...'
+    # print 'connecting...'
     if xmpp.connect():
-        print 'connected'
+        # print 'connected'
         xmpp.process(block=True)
-        print 'unexpected death!'
+        # print 'unexpected death!'
     else:
-        print 'could NOT connect'
+        # print 'could NOT connect'
+        pass
 
 if __name__ == '__main__':
     main()

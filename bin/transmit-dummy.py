@@ -74,7 +74,7 @@ class DummyTagCloudDataGenerator(object):
             u'湘南台高校', u'湘南高校'
         ]
         # self.words = [
-        #     'Enoshima', 'Terrace Mall', 
+        #     'Enoshima', 'Terrace Mall',
         #     'Shonandai', 'Enoden', 'Fujisawa', 'Tsujidou', 'Shonan Life-Town',
         #     'Isuzu', 'Route 467', 'Route 1', 'Nippon Univ.', 'Bunkyo Univ.', 'Keio Univ.',
         #     'Keio SFC', 'Kugenuma Beach', 'Katase Enoshima Station',
@@ -129,7 +129,7 @@ class DummyImageDataGenerator(object):
         # for f in os.listdir(real_dir_path):
         for f in self.file_list_cache[real_dir_path]:
             if not img_file_pat.search(f):
-                print 'not image: skipping %s' % f
+                # print 'not image: skipping %s' % f
                 continue
 
             real_f_path = os.path.join(real_dir_path, f)
@@ -181,7 +181,7 @@ class PubsubClient(sleekxmpp.ClientXMPP):
         # self.add_event_handler('pubsub_publish', self._publish)
 
     def start(self, event):
-        print 'start'
+        # print 'start'
         # self.get_roster()
         # print 'got roster'
         # self.send_presence()
@@ -191,8 +191,8 @@ class PubsubClient(sleekxmpp.ClientXMPP):
         self.start_sending_data()
 
     def start_sending_data(self):
-        # prepare dummy data generators 
-        print 'start_sending_data() starting'
+        # prepare dummy data generators
+        # print 'start_sending_data() starting'
         try:
             dummy_data_generators = [
                 DummyGraphDataGenerator(),
@@ -201,11 +201,11 @@ class PubsubClient(sleekxmpp.ClientXMPP):
                 DummyImageDataGenerator()
             ]
         except:
-            print 'except!(1)'
+            # print 'except!(1)'
             traceback.print_exc()
             etype, value, etraceback = sys.exc_info()
             raise etype, value, etraceback
-        print 'prepared generators'
+        # print 'prepared generators'
 
         fire_timing = {
             'sb-graph1_data': 110,
@@ -237,7 +237,7 @@ class PubsubClient(sleekxmpp.ClientXMPP):
                         payload = ET.fromstring(dummy_payload_xml_string)
                         # print 'payload built'
 
-                        print '[generator:%s] sending: %s' % (node_name, dummy_payload_xml_string)
+                        # print '[generator:%s] sending: %s' % (node_name, dummy_payload_xml_string)
                         try:
                             self['xep_0060'].publish(
                                 'pubsub.sox.ht.sfc.keio.ac.jp',
@@ -246,15 +246,15 @@ class PubsubClient(sleekxmpp.ClientXMPP):
                                 payload=payload
                             )
                         except IqTimeout:
-                            print '[geenrator:%s] IGNORE IqTimeout!' % node_name
+                            # print '[geenrator:%s] IGNORE IqTimeout!' % node_name
                             err_count += 1
                             if err_threshold <= err_count:
                                 break
-                        print '[generator:%s] sent: %s' % (node_name, dummy_payload_xml_string)
+                        # print '[generator:%s] sent: %s' % (node_name, dummy_payload_xml_string)
 
                         counter[node_name] = 0
             except:
-                print 'except!'
+                # print 'except!'
                 traceback.print_exc()
                 etype, value, etraceback = sys.exc_info()
                 raise etype, value, etraceback

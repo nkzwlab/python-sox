@@ -69,7 +69,8 @@ class GenovaDataSendingClient(sleekxmpp.ClientXMPP):
         # self.add_event_handler('pubsub_publish', self._publish)
 
     def debug(self, msg):
-        print '[%s] %s' % (self.node_name, msg)
+        # print '[%s] %s' % (self.node_name, msg)
+        pass
 
     def start(self, event):
         self.debug('start')
@@ -132,7 +133,8 @@ class GenovaDataSendingClient(sleekxmpp.ClientXMPP):
 
 def main():
     logger = logging.getLogger()
-    logger.setLevel(logging.DEBUG)
+    # logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.INFO)
 
     threads = set([])
     clients = set([])
@@ -169,7 +171,7 @@ def main():
         gthread.client = client
         gthread.genova_id = i  # remember genova-id
         threads.add(gthread)
-        print 'thread for genova-%d started' % i
+        # print 'thread for genova-%d started' % i
 
     try:
         # finish means err occured too much
@@ -178,7 +180,7 @@ def main():
         finished_client = finished_thread.client
         clients.remove(finished_client)  # remove from active list
         genova_id = finished_thread.genova_id
-        print '@@@ id %d died! respawning again' % genova_id
+        # print '@@@ id %d died! respawning again' % genova_id
         threads.remove(finished_thread)  # remove from active list
 
         # connect and process again for the genova ID
@@ -196,4 +198,3 @@ def main():
 if __name__ == '__main__':
     main_thread = gevent.spawn(main)
     main_thread.join()
-
