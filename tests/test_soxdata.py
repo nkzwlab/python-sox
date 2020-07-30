@@ -20,7 +20,67 @@ def _node_attr(node):
         ret[k] = v
     return ret
 
+
 class SensorDataTestCase(TestCase):
+
+    def test_from_dict(self):
+        in1 = {'values': []}
+        r1 = SensorData.from_dict(in1)
+        assert isinstance(r1, SensorData)
+        assert len(r1.values) == 0
+
+        tz_jst = tz.tzoffset('JST', 3600 * 9)
+        ts1 = datetime.datetime(2020, 1, 2, 11, 22, 33, tzinfo=tz_jst)
+        in2 = {'values': [{'id': 'hoge', 'typed_value': '123', 'raw_value': None, 'timestamp': ts1.isoformat()}]}
+        r2 = SensorData.from_dict(in2)
+        assert isinstance(r2, SensorData)
+        assert len(r2.values) == 1
+        assert r2.values[0].id == "hoge"
+        assert r2.values[0].typed_value == "123"
+        assert r2.values[0].raw_value is None
+        assert r2.values[0].timestamp == ts1
+        
+        ts2 = datetime.datetime(2020, 2, 3, 11, 22, 33, tzinfo=tz_jst)
+        tv2 = TransducerValue(id='moge', typed_value='123', raw_value='raw123', timestamp=ts2)
+        in3 = {
+            'values': [
+                {'id': 'hoge', 'typed_value': '123', 'raw_value': None, 'timestamp': ts1.isoformat()},
+                {'id': 'moge', 'typed_value': '123', 'raw_value': 'raw123', 'timestamp': ts2.isoformat()}
+            ]
+        }
+        r3 = SensorData.from_dict(in3)
+        assert isinstance(r3, SensorData)
+        assert len(r3.values) == 2
+        assert r3.values[0].id == "hoge"
+        assert r3.values[0].typed_value == "123"
+        assert r3.values[0].raw_value is None
+        assert r3.values[0].timestamp == ts1
+        assert r3.values[1].id == "moge"
+        assert r3.values[1].typed_value == "123"
+        assert r3.values[1].raw_value == "raw123"
+        assert r3.values[1].timestamp == ts2
+    
+    def test_to_dict(self):
+        sd = SensorData()
+        assert sd.to_dict() == {'values': []}
+
+        tz_jst = tz.tzoffset('JST', 3600 * 9)
+        ts1 = datetime.datetime(2020, 1, 2, 11, 22, 33, tzinfo=tz_jst)
+        tv1 = TransducerValue(id='hoge', typed_value='123', timestamp=ts1)
+        sd.add_value(tv1)
+        assert sd.to_dict() == {'values': [{'id': 'hoge', 'typed_value': '123', 'raw_value': None, 'timestamp': ts1.isoformat()}]}
+
+
+        ts2 = datetime.datetime(2020, 2, 3, 11, 22, 33, tzinfo=tz_jst)
+        tv2 = TransducerValue(id='moge', typed_value='123', raw_value='raw123', timestamp=ts2)
+        sd.add_value(tv2)
+        assert sd.to_dict() == {
+            'values': [
+                {'id': 'hoge', 'typed_value': '123', 'raw_value': None, 'timestamp': ts1.isoformat()},
+                {'id': 'moge', 'typed_value': '123', 'raw_value': 'raw123', 'timestamp': ts2.isoformat()}
+            ]
+        }
+
 
     def test_add_value(self):
         tv1 = TransducerValue(id='hoge', typed_value='123')
@@ -83,12 +143,41 @@ class SensorDataTestCase(TestCase):
 
 
 class TransducerValueTestCase(TestCase):
+    def test_to_dict(self):
+        tz_jst = tz.tzoffset('JST', 3600 * 9)
+        ts1 = datetime.datetime(2020, 1, 2, 11, 22, 33, tzinfo=tz_jst)
+        tv1 = TransducerValue(id='hoge', typed_value='123', timestamp=ts1)
+        assert tv1.to_dict() == {'id': 'hoge', 'typed_value': '123', 'raw_value': None, 'timestamp': ts1.isoformat()}
+
+        ts2 = datetime.datetime(2020, 2, 3, 11, 22, 33, tzinfo=tz_jst)
+        tv2 = TransducerValue(id='moge', typed_value='123', raw_value='raw123', timestamp=ts2)
+        assert tv2.to_dict() == {'id': 'moge', 'typed_value': '123', 'raw_value': 'raw123', 'timestamp': ts2.isoformat()}
+    
+    def test_from_dict(self):
+        tz_jst = tz.tzoffset('JST', 3600 * 9)
+        ts1 = datetime.datetime(2020, 1, 2, 11, 22, 33, tzinfo=tz_jst)
+        in1 = {'id': 'hoge', 'typed_value': '123', 'raw_value': None, 'timestamp': ts1.isoformat()}
+        tv1 = TransducerValue.from_dict(in1)
+        assert isinstance(tv1, TransducerValue)
+        assert tv1.id == "hoge"
+        assert tv1.typed_value == "123"
+        assert tv1.raw_value is None
+        assert tv1.timestamp == ts1
+        
+        ts2 = datetime.datetime(2020, 2, 3, 11, 22, 33, tzinfo=tz_jst)
+        tv2 = TransducerValue.from_dict({'id': 'moge', 'typed_value': '123', 'raw_value': 'raw123', 'timestamp': ts2.isoformat()})
+        assert isinstance(tv2, TransducerValue)
+        assert tv2.id == "moge"
+        assert tv2.typed_value == "123"
+        assert tv2.raw_value == "raw123"
+        assert tv2.timestamp == ts2
+
     def test_init(self):
         tv1 = TransducerValue('idname1', 'value1')
         assert tv1.id == 'idname1'
         assert tv1.typed_value == 'value1'
         assert tv1.timestamp is not None
-        assert tv1.timezone is not None
+        # assert tv1.timezone is not None
 
     def test_to_xml(self):
         tv1 = TransducerValue('idname1', 'value1')

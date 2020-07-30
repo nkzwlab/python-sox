@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 from lxml import etree
 import datetime
-import dateutil.tz
+# import dateutil.tz
+import tzlocal
+import dateutil.parser
 from . import soxtimestamp
 
 from bs4 import BeautifulSoup
@@ -17,6 +19,16 @@ META_TRANSDUCER_ATTRS = (
 
 
 class SensorData(object):
+
+    @staticmethod
+    def from_dict(item):
+        sd = SensorData()
+        dict_values = item['values']
+        for dval in dict_values:
+            transducer_val = TransducerValue.from_dict(dval)
+            sd.add_value(transducer_val)
+        return sd
+
     @staticmethod
     def parse(packet_str):
         # TODO: not debugged
@@ -57,10 +69,27 @@ class SensorData(object):
     def to_string(self, pretty=True):
         xml = self.to_xml()
         return etree.tostring(xml, pretty_print=pretty).decode()
+    
+    def to_dict(self):
+        dict_values = [ v.to_dict() for v in self.values ]
+        return dict(values=dict_values)
 
 
 class TransducerValue(object):
+
+    @staticmethod
+    def from_dict(item):
+        timestamp = dateutil.parser.parse(item['timestamp'])
+        return TransducerValue(
+            item['id'],
+            item['typed_value'],
+            timestamp,
+            raw_value=item['raw_value']
+        )
+
     def __init__(self, id, typed_value, timestamp=None, timezone=None, raw_value=None):
+        # NOTE: accept timezone parameter for backward compatibility,
+        #       but current implementation expect timezone is set within the timestamp
         assert isinstance(id, (str, ))
         assert isinstance(typed_value, (str, ))
         if timestamp and isinstance(timestamp, (str, )):
@@ -68,17 +97,15 @@ class TransducerValue(object):
         self.id = id
         self.typed_value = typed_value
         self.raw_value = raw_value
-        if timestamp and type(timestamp) is datetime.datetime:
-            tz = timezone or timestamp.tzinfo or dateutil.tz.tzlocal()
-        else:
-            tz = timezone or dateutil.tz.tzlocal()
-        self.timestamp = timestamp or datetime.datetime.now(tz)
-        self.timezone = tz
+        local_tz = tzlocal.get_localzone()
+        self.timestamp = timestamp or datetime.datetime.now(local_tz)
+        if self.timestamp.tzinfo is None:
+            self.timestamp = local_tz.localize(self.timestamp)
 
     def to_xml(self):
         ts = self.timestamp
         if type(ts) is datetime.datetime:
-            ts = soxtimestamp.timestamp(ts, tz=self.timezone)
+            ts = soxtimestamp.timestamp(ts)
 
         attributes = dict(
             id=self.id,
@@ -100,6 +127,14 @@ class TransducerValue(object):
     def to_string(self, pretty=True):
         xml = self.to_xml()
         return etree.tostring(xml, pretty_print=pretty).decode()
+    
+    def to_dict(self):
+        return dict(
+            id=self.id,
+            typed_value=self.typed_value,
+            timestamp=self.timestamp.isoformat(),
+            raw_value=self.raw_value
+        )
 
 
 class SensorMeta(object):
@@ -113,9 +148,10 @@ class SensorMeta(object):
         self.serialNumber = serialNumber
 
         if timestamp and isinstance(timestamp, datetime.datetime):
-            tz = timezone or timestamp.tzinfo or dateutil.tz.tzlocal()
+            tz = timezone or timestamp.tzinfo or tzlocal.get_localzone()
         else:
-            tz = timezone or dateutil.tz.tzlocal()
+            tz = timezone or tzlocal.get_localzone()
+        self.timestamp = timestamp or datetime.datetime.now(tz)
         self.timestamp = timestamp or datetime.datetime.now(tz)
         self.timezone = timezone
 
@@ -152,12 +188,6 @@ class SensorMeta(object):
 class MetaTransducer(object):
     def __init__(self, *args, **kwargs):
         self.attributes = {}
-        # self.attr_names = (
-        #     'name', 'id', 'units', 'unitScalar', 'canActuate',
-        #     'hasOwnNode', 'transducerTypeName', 'manufacturer',
-        #     'partNumber', 'serialNumber', 'minValue', 'maxValue',
-        #     'resolution', 'precision', 'accuracy'
-        # )
 
         for attr in META_TRANSDUCER_ATTRS:
             self[attr] = kwargs[attr] if attr in kwargs else None
@@ -182,7 +212,6 @@ class MetaTransducer(object):
             elif attr in self.attributes and self.attributes[attr] is not None:
                 tmp_attrs[attr] = self.attributes[attr]
 
-        # transducer_tag = etree.Element('transducer', self.attributes)
         transducer_tag = etree.Element('transducer', tmp_attrs)
         return transducer_tag
 
