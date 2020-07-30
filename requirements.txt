@@ -13,6 +13,5 @@ python-dateutil==2.2
 simplejson==3.4.0
 six==1.6.1
 sleekxmpp==1.2.4
-wsgiref==0.1.2
 grequests==0.2.0
 

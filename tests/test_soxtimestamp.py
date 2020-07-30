@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import datetime
 import dateutil.tz as tz
+import pytest
 from unittest import TestCase
 from nose.tools import ok_, eq_
 
@@ -25,23 +26,23 @@ class SoxTimestampTestCase(TestCase):
 
         d1 = datetime.datetime(1999, 1, 23, 14, 44, 53, 33451, tz_jst)
         ts1 = soxtimestamp.timestamp(d1)
-        eq_(ts1, '1999-01-23T14:44:53.33451+09:00')
+        assert ts1 == '1999-01-23T14:44:53.33451+09:00'
 
         d2 = datetime.datetime(2014, 4, 1, 12, 34, 56, 54243, tz_utc)
         ts2 = soxtimestamp.timestamp(d2)
-        eq_(ts2, '2014-04-01T12:34:56.54243Z')
+        assert ts2 == '2014-04-01T12:34:56.54243Z'
 
         d3 = datetime.datetime(1985, 5, 12, 0, 0, 0, 111, tz_pst)
         ts3 = soxtimestamp.timestamp(d3)
-        eq_(ts3, '1985-05-12T00:00:00.111-08:00')
+        assert ts3 == '1985-05-12T00:00:00.111-08:00'
 
         d4 = datetime.datetime(2001, 12, 31, 1, 2, 3)
         ts4 = soxtimestamp.timestamp(d4)
-        eq_(ts4, '2001-12-31T01:02:03+09:00')  # assuming system timezone is JST
+        assert ts4 == '2001-12-31T01:02:03+09:00'  # assuming system timezone is JST
 
         d5 = datetime.datetime(2002, 1, 2, 18, 22, 59, 1234)
         ts5 = soxtimestamp.timestamp(d5)
-        eq_(ts5, '2002-01-02T18:22:59.1234+09:00')
+        assert ts5 == '2002-01-02T18:22:59.1234+09:00'
 
     def test_is_sox_timestamp_format(self):
         valid_timestamps = [
@@ -94,7 +95,7 @@ class SoxTimestampTestCase(TestCase):
                                 [' %s' % ts for ts in valid_timestamps]
 
         for valid_ts in valid_timestamps:
-            ok_(soxtimestamp.is_sox_timestamp_format(valid_ts))
+            assert soxtimestamp.is_sox_timestamp_format(valid_ts)
 
         for invalid_ts in invalid_timestamps:
-            ok_(not soxtimestamp.is_sox_timestamp_format(invalid_ts))
+            assert not soxtimestamp.is_sox_timestamp_format(invalid_ts)

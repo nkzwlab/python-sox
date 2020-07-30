@@ -1,9 +1,8 @@
-#!/usr/bin/python
 # -*- coding: utf-8 -*-
 from lxml import etree
 import datetime
 import dateutil.tz
-import soxtimestamp
+from . import soxtimestamp
 
 from bs4 import BeautifulSoup
 
@@ -48,14 +47,14 @@ class SensorData(object):
 
     def to_string(self, pretty=True):
         xml = self.to_xml()
-        return etree.tostring(xml, pretty_print=pretty)
+        return etree.tostring(xml, pretty_print=pretty).decode()
 
 
 class TransducerValue(object):
     def __init__(self, id, typed_value, timestamp=None, timezone=None, raw_value=None):
-        assert isinstance(id, (str, unicode))
-        assert isinstance(typed_value, (str, unicode))
-        if timestamp and isinstance(timestamp, (str, unicode)):
+        assert isinstance(id, (str, ))
+        assert isinstance(typed_value, (str, ))
+        if timestamp and isinstance(timestamp, (str, )):
             assert soxtimestamp.is_sox_timestamp_format(timestamp), 'timestamp %s is not XEP-0082 format' % timestamp
         self.id = id
         self.typed_value = typed_value
@@ -91,7 +90,7 @@ class TransducerValue(object):
 
     def to_string(self, pretty=True):
         xml = self.to_xml()
-        return etree.tostring(xml, pretty_print=pretty)
+        return etree.tostring(xml, pretty_print=pretty).decode()
 
 
 class SensorMeta(object):

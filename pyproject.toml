@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "pysox"
+version = "0.2.0"
+description = ""
+authors = ["Tomotaka Ito <tomotaka.ito@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+BeautifulSoup4 = "^4.9.1"
+SleekXMPP = "^1.3.3"
+gevent = "^20.6.2"
+pytest = "^6.0.0"
+python-dateutil = "^2.8.1"
+nose = "^1.3.7"
+lxml = "^4.5.2"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
