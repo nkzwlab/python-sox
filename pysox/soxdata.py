@@ -152,7 +152,6 @@ class SensorMeta(object):
         else:
             tz = timezone or tzlocal.get_localzone()
         self.timestamp = timestamp or datetime.datetime.now(tz)
-        self.timestamp = timestamp or datetime.datetime.now(tz)
         self.timezone = timezone
 
     def add_transducer(self, tdr):
