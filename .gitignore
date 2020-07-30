@@ -12,4 +12,6 @@ data/
 .vscode/
 
 *.egg-info
+*.egg-info/
+
 
