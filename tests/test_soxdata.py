@@ -6,7 +6,12 @@ import dateutil.tz as tz
 from unittest import TestCase
 from nose.tools import ok_, eq_
 
-from pysox.soxdata import SensorData, TransducerValue
+from pysox.soxdata import (
+    SensorData,
+    TransducerValue,
+    SensorMeta,
+    MetaTransducer
+)
 
 
 def _node_attr(node):
@@ -110,3 +115,79 @@ class TransducerValueTestCase(TestCase):
         assert tv2.to_string() == '<transducerValue id="moga" typedValue="mogavalue" timestamp="2014-04-15T12:23:41.223+09:00" rawValue="mogavalue"/>\n'
         assert tv2.to_string(pretty=True) == '<transducerValue id="moga" typedValue="mogavalue" timestamp="2014-04-15T12:23:41.223+09:00" rawValue="mogavalue"/>\n'
         assert tv2.to_string(pretty=False) == '<transducerValue id="moga" typedValue="mogavalue" timestamp="2014-04-15T12:23:41.223+09:00" rawValue="mogavalue"/>'
+
+
+class SensorMetaTestCase(TestCase):
+
+    def test_to_string(self):
+        mt1 = MetaTransducer(
+            id='hoge',
+            name='hoge',
+            units='celcius',
+            minValue='-10',
+            maxValue='50'
+        )
+
+        ts = datetime.datetime(2020, 5, 1, 12, 34, 56)
+        sm1 = SensorMeta(
+            'moge',
+            'mogeid',
+            'mogetype',
+            ts,
+            'mogedesc',
+            's1234'
+        )
+        sm1.add_transducer(mt1)
+
+        assert sm1.to_string() == '<device timestamp="2020-05-01T12:34:56+09:00" xmlns="http://jabber.org/protocol/sox" name="moge" id="mogeid" type="mogetype" description="mogedesc" serialNumber="s1234">\n  <transducer name="hoge" id="hoge" units="celcius" minValue="-10" maxValue="50"/>\n</device>\n'
+
+
+class MetaTransducerTestCase(TestCase):
+    def test_accessor(self):
+        mt1 = MetaTransducer(
+            id='hoge',
+            name='hoge',
+            units='celcius',
+            minValue='-10',
+            maxValue='50'
+        )
+
+        assert mt1['id'] == 'hoge'
+        assert mt1['name'] == 'hoge'
+        assert mt1['units'] == 'celcius'
+        assert mt1['minValue'] == '-10'
+        assert mt1['maxValue'] == '50'
+    
+    def test_to_xml(self):
+        mt1 = MetaTransducer(
+            name='hoge',
+            id='hoge',
+            units='celcius',
+            minValue='-10',
+            maxValue='50'
+        )
+
+        xml1 = mt1.to_xml()
+
+        attr1 = _node_attr(xml1)
+
+        assert len(xml1.getchildren()) == 0
+        assert attr1['id'] == 'hoge'
+        assert attr1['name'] == 'hoge'
+        assert attr1['units'] == 'celcius'
+        assert attr1['minValue'] == '-10'
+        assert attr1['maxValue'] == '50'
+    
+    def test_to_string(self):
+        mt1 = MetaTransducer(
+            name='hoge',
+            id='hoge',
+            units='celcius',
+            minValue='-10',
+            maxValue='50'
+        )
+
+        assert mt1.to_string() == '<transducer name="hoge" id="hoge" units="celcius" minValue="-10" maxValue="50"/>\n'
+        assert mt1.to_string(pretty=True) == '<transducer name="hoge" id="hoge" units="celcius" minValue="-10" maxValue="50"/>\n'
+        assert mt1.to_string(pretty=False) == '<transducer name="hoge" id="hoge" units="celcius" minValue="-10" maxValue="50"/>'
+

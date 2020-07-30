@@ -5,6 +5,15 @@ import dateutil.tz
 from . import soxtimestamp
 
 from bs4 import BeautifulSoup
+        
+SENSOR_META_ATTRS = ('name', 'id', 'type', 'description', 'serialNumber')
+        
+META_TRANSDUCER_ATTRS = (
+    'name', 'id', 'units', 'unitScalar', 'canActuate',
+    'hasOwnNode', 'transducerTypeName', 'manufacturer',
+    'partNumber', 'serialNumber', 'minValue', 'maxValue',
+    'resolution', 'precision', 'accuracy'
+)
 
 
 class SensorData(object):
@@ -103,7 +112,7 @@ class SensorMeta(object):
         self.description = description
         self.serialNumber = serialNumber
 
-        if timestamp and type(timestamp) is datetime.datetime:
+        if timestamp and isinstance(timestamp, datetime.datetime):
             tz = timezone or timestamp.tzinfo or dateutil.tz.tzlocal()
         else:
             tz = timezone or dateutil.tz.tzlocal()
@@ -119,7 +128,7 @@ class SensorMeta(object):
             ts = soxtimestamp.timestamp(ts, tz=self.timezone)
 
         attributes = dict(timestamp=ts, xmlns='http://jabber.org/protocol/sox')
-        for attrname in ('name', 'id', 'type', 'description', 'serialNumber'):
+        for attrname in SENSOR_META_ATTRS:
             attributes[attrname] = getattr(self, attrname)
 
         device_tag = etree.Element('device', attributes)
@@ -137,20 +146,20 @@ class SensorMeta(object):
 
     def to_string(self, pretty=True):
         xml = self.to_xml()
-        return etree.tostring(xml, pretty_print=pretty)
+        return etree.tostring(xml, pretty_print=pretty).decode()
 
 
 class MetaTransducer(object):
     def __init__(self, *args, **kwargs):
         self.attributes = {}
-        self.attr_names = (
-            'name', 'id', 'units', 'unitScalar', 'canActuate',
-            'hasOwnNode', 'transducerTypeName', 'manufacturer',
-            'partNumber', 'serialNumber', 'minValue', 'maxValue',
-            'resolution', 'precision', 'accuracy'
-        )
+        # self.attr_names = (
+        #     'name', 'id', 'units', 'unitScalar', 'canActuate',
+        #     'hasOwnNode', 'transducerTypeName', 'manufacturer',
+        #     'partNumber', 'serialNumber', 'minValue', 'maxValue',
+        #     'resolution', 'precision', 'accuracy'
+        # )
 
-        for attr in self.attr_names:
+        for attr in META_TRANSDUCER_ATTRS:
             self[attr] = kwargs[attr] if attr in kwargs else None
 
     def __getitem__(self, attrname):
@@ -167,7 +176,7 @@ class MetaTransducer(object):
             assert self.attributes[r_attr] is not None, 'attribute is required: %s' % r_attr
             tmp_attrs[r_attr]  = self.attributes[r_attr]
 
-        for attr in self.attr_names:
+        for attr in META_TRANSDUCER_ATTRS:
             if attr in required:
                 continue
             elif attr in self.attributes and self.attributes[attr] is not None:
@@ -186,5 +195,5 @@ class MetaTransducer(object):
 
     def to_string(self, pretty=True):
         xml = self.to_xml()
-        return etree.tostring(xml, pretty_print=pretty)
+        return etree.tostring(xml, pretty_print=pretty).decode()
 
