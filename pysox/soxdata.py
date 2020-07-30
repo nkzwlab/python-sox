@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from lxml import etree
 import datetime
-# import dateutil.tz
 import tzlocal
 import dateutil.parser
 from . import soxtimestamp
