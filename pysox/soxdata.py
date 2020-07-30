@@ -138,7 +138,7 @@ class TransducerValue(object):
 
 
 class SensorMeta(object):
-    def __init__(self, name, id, type, timestamp, description, serialNumber, timezone=None):
+    def __init__(self, name, id, type, timestamp, description, serialNumber):
         self.transducers = []
 
         self.name = name
@@ -147,12 +147,10 @@ class SensorMeta(object):
         self.description = description
         self.serialNumber = serialNumber
 
-        if timestamp and isinstance(timestamp, datetime.datetime):
-            tz = timezone or timestamp.tzinfo or tzlocal.get_localzone()
-        else:
-            tz = timezone or tzlocal.get_localzone()
+        local_tz = tzlocal.get_localzone()
         self.timestamp = timestamp or datetime.datetime.now(tz)
-        self.timezone = timezone
+        if self.timestamp.tzinfo is None:
+            self.timestamp = local_tz.localize(self.timestamp)
 
     def add_transducer(self, tdr):
         self.transducers.append(tdr)
@@ -160,7 +158,7 @@ class SensorMeta(object):
     def to_xml(self):
         ts = self.timestamp
         if type(ts) is datetime.datetime:
-            ts = soxtimestamp.timestamp(ts, tz=self.timezone)
+            ts = soxtimestamp.timestamp(ts)
 
         attributes = dict(timestamp=ts, xmlns='http://jabber.org/protocol/sox')
         for attrname in SENSOR_META_ATTRS:
