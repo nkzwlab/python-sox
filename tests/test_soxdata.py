@@ -81,7 +81,6 @@ class SensorDataTestCase(TestCase):
             ]
         }
 
-
     def test_add_value(self):
         tv1 = TransducerValue(id='hoge', typed_value='123')
 
@@ -130,7 +129,6 @@ class SensorDataTestCase(TestCase):
         tv1 = TransducerValue(id='hoge', typed_value='123', timestamp=ts1)
         sd1.add_value(tv1)
         assert sd1.to_string() == '<data xmlns="http://jabber.org/protocol/sox">\n  <transducerValue id="hoge" typedValue="123" timestamp="2014-04-15T12:23:34.123+09:00" rawValue="123"/>\n</data>\n'
-        # assert sd1.to_string(pretty=True) == '<data xmlns="http://jabber.org/protocol/sox">\n  <transducerValue id="hoge" timestamp="2014-04-15T12:23:34.123+09:00" typedValue="123"/>\n</data>\n'
         assert sd1.to_string(pretty=True) == '<data xmlns="http://jabber.org/protocol/sox">\n  <transducerValue id="hoge" typedValue="123" timestamp="2014-04-15T12:23:34.123+09:00" rawValue="123"/>\n</data>\n'
         assert sd1.to_string(pretty=False) == '<data xmlns="http://jabber.org/protocol/sox"><transducerValue id="hoge" typedValue="123" timestamp="2014-04-15T12:23:34.123+09:00" rawValue="123"/></data>'
 
@@ -138,7 +136,6 @@ class SensorDataTestCase(TestCase):
         sd1.add_value(tv2)
         assert sd1.to_string() == '<data xmlns="http://jabber.org/protocol/sox">\n  <transducerValue id="hoge" typedValue="123" timestamp="2014-04-15T12:23:34.123+09:00" rawValue="123"/>\n  <transducerValue id="moga" typedValue="mogavalue" timestamp="2014-04-15T12:23:41.223+09:00" rawValue="mogavalue"/>\n</data>\n'
         assert sd1.to_string(pretty=True) == '<data xmlns="http://jabber.org/protocol/sox">\n  <transducerValue id="hoge" typedValue="123" timestamp="2014-04-15T12:23:34.123+09:00" rawValue="123"/>\n  <transducerValue id="moga" typedValue="mogavalue" timestamp="2014-04-15T12:23:41.223+09:00" rawValue="mogavalue"/>\n</data>\n'
-        # assert sd1.to_string(pretty=True) == '<data xmlns="http://jabber.org/protocol/sox">\n  <transducerValue id="hoge" timestamp="2014-04-15T12:23:34.123+09:00" typedValue="123"/>\n  <transducerValue id="moga" timestamp="2014-04-15T12:23:41.223+09:00" typedValue="mogavalue"/>\n</data>\n'
         assert sd1.to_string(pretty=False) == '<data xmlns="http://jabber.org/protocol/sox"><transducerValue id="hoge" typedValue="123" timestamp="2014-04-15T12:23:34.123+09:00" rawValue="123"/><transducerValue id="moga" typedValue="mogavalue" timestamp="2014-04-15T12:23:41.223+09:00" rawValue="mogavalue"/></data>'
 
 
@@ -177,7 +174,6 @@ class TransducerValueTestCase(TestCase):
         assert tv1.id == 'idname1'
         assert tv1.typed_value == 'value1'
         assert tv1.timestamp is not None
-        # assert tv1.timezone is not None
 
     def test_to_xml(self):
         tv1 = TransducerValue('idname1', 'value1')
@@ -207,7 +203,6 @@ class TransducerValueTestCase(TestCase):
 
 
 class SensorMetaTestCase(TestCase):
-
     def test_to_string(self):
         mt1 = MetaTransducer(
             id='hoge',
