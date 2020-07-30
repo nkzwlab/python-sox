@@ -14,4 +14,6 @@ data/
 *.egg-info
 *.egg-info/
 
+junk/
+
 
