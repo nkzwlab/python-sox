@@ -3,10 +3,12 @@ import pytest
 
 import datetime
 import dateutil.tz as tz
+import tzlocal
 from unittest import TestCase
 from nose.tools import ok_, eq_
 
 from pysox.soxdata import (
+    build_soxdata,
     SensorData,
     TransducerValue,
     SensorMeta,
@@ -274,4 +276,55 @@ class MetaTransducerTestCase(TestCase):
         assert mt1.to_string() == '<transducer name="hoge" id="hoge" units="celcius" minValue="-10" maxValue="50"/>\n'
         assert mt1.to_string(pretty=True) == '<transducer name="hoge" id="hoge" units="celcius" minValue="-10" maxValue="50"/>\n'
         assert mt1.to_string(pretty=False) == '<transducer name="hoge" id="hoge" units="celcius" minValue="-10" maxValue="50"/>'
+
+
+class UtilFunctiionsTestCase(TestCase):
+
+    def test_build_soxdata(self):
+        def _get_name2v(values):
+            return { v.id: v for v in values }
+
+        local_zone = tzlocal.get_localzone()
+        now = datetime.datetime.now(local_zone)
+
+        tv1 = dict(
+            a="av1",
+            b="bv1"
+        )
+        sd1 = build_soxdata(tv1)
+        assert len(sd1.values) == len(tv1.keys())
+        name2v1 = _get_name2v(sd1.values)
+        assert isinstance(sd1, SensorData)
+        for v in sd1.values:
+            assert isinstance(v, TransducerValue)
+        assert name2v1["a"].typed_value == "av1"
+        assert name2v1["a"].raw_value == "av1"
+        assert name2v1["a"].timestamp.tzinfo is not None
+        assert now < name2v1["a"].timestamp
+        assert name2v1["b"].typed_value == "bv1"
+        assert name2v1["b"].raw_value == "bv1"
+        assert name2v1["b"].timestamp.tzinfo is not None
+        assert now < name2v1["b"].timestamp
+
+        tv2 = dict(
+            a="av2",
+            b="bv2"
+        )
+        rv2 = dict(
+            a="a_rv2",
+            c="c_rv2"
+        )
+        sd2 = build_soxdata(tv2, rv2)
+        assert len(sd2.values) == 3
+        assert isinstance(sd2, SensorData)
+        for v in sd2.values:
+            assert isinstance(v, TransducerValue)
+        n2v2 = _get_name2v(sd2.values)
+        assert n2v2["a"].typed_value == "av2"
+        assert n2v2["a"].raw_value == "a_rv2"
+        assert n2v2["b"].typed_value == "bv2"
+        assert n2v2["b"].raw_value == "bv2"
+        assert n2v2["c"].typed_value == "c_rv2"
+        assert n2v2["c"].raw_value == "c_rv2"
+
 

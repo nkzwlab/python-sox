@@ -17,6 +17,38 @@ META_TRANSDUCER_ATTRS = (
 )
 
 
+def build_soxdata(typed_values, raw_values=None):
+    assert isinstance(typed_values, dict)
+
+    if raw_values is None:
+        raw_values = typed_values
+    else:
+        assert isinstance(raw_values, dict)
+
+    local_tz = tzlocal.get_localzone()
+    timestamp = datetime.datetime.now(local_tz)
+    
+    sd = SensorData()
+
+    t_keys = set(typed_values.keys())
+    r_keys = set(raw_values.keys())
+    both_keys = t_keys | r_keys
+
+    for k in both_keys:
+        typed_v = typed_values.get(k, raw_values.get(k))
+        raw_v = raw_values.get(k, typed_values.get(k))
+
+        tdr_v = TransducerValue(
+            id=k,
+            typed_value=typed_v,
+            timestamp=timestamp,
+            raw_value=raw_v
+        )
+        sd.add_value(tdr_v)
+
+    return sd
+
+
 class SensorData(object):
 
     @staticmethod
