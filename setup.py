@@ -8,7 +8,7 @@ def _requires_from_file(filename):
 
 
 setup(
-    name='pysox',
+    name='python-sox',
     version='0.2.0',
     description='Sensor Over XMPP library for python',
     author='Hide. Tokuda Laboratory',
