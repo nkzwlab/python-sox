@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "pysox"
+name = "python-sox"
 version = "0.2.0"
 description = ""
 authors = ["Tomotaka Ito <tomotaka.ito@gmail.com>"]
