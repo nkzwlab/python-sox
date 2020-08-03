@@ -3,6 +3,7 @@
 *.swp
 
 dist/
+build/
 
 
 .venv
